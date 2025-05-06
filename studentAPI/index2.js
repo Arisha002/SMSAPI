@@ -86,6 +86,25 @@ app.get('/department_employeedetails_locations',async(req,res)=>{
     }
 });
 
+app.get('/jobs',async(req,res)=>{
+    try{
+        const result = await pool.query('select * from jobs');
+        res.json(result.rows);
+    }
+    catch(err){
+        res.status(500).json({Error:err.message});
+    }
+});
+app.get('/employees',async(req,res)=>{
+    try{
+        const result = await pool.query('select count(*) from employees');
+        res.json(result.rows);
+    }
+    catch(err){
+        res.status(500).json({Error:err.message});
+    }
+});
+
 
 
 app.get('/employees_departmentdetails_locations_countries',async(req,res)=>{
