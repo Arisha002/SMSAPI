@@ -29,9 +29,22 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             text-align: center;
           }
+          .regions-container,.jobs-container{
+           
+            width: 250px;
+            padding: 20px;
+            background-color: white;
+            border: 2px solid #333;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+          }
       
           .employee-container h2 {
             margin-bottom: 10px;
+          }
+          .box{
+            display: inline-block;
           }
       
           .employee-count {
@@ -43,21 +56,29 @@
 </head>
 
 <body>
-   
-    <div class="employee-container" >
-        <h2>Employees</h2>
-        <div class="employee-count" id="#Cemployees">Loading...</div>
+   <div class="box">
+    <div class="employee-container"  id="Cemployees">
+       
+       </div>
+       <br>
+       <div class="jobs-container"  id="Cjobs">
+       
+       </div>
+       <br>
+       
+       <div class="regions-container"  id="Cregions">
+       
+       </div>
+        <div class="locations-container"  id="Clocations">
+       
+       </div>
+       </div>
 
-      
- 
-      <!-- <div class="regions-container">
-        <h2>Regions</h2>
-        <div class="regions-count" id="regionsCount">0</div>
-      </div> -->
+
+    
 
 
-  
-    </div>
+
 
 
    
@@ -73,4 +94,4 @@
     integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
     crossorigin="anonymous"></script>
 
-    <script src="js/count.js"></script>
+<script src="js/count.js"></script>
