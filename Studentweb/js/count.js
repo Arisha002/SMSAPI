@@ -15,7 +15,7 @@ fetch(employee_API_LINK).then(response=>{
         const row = document.createElement("employee-container");
 
         row.innerHTML=`
-        <p>Count : ${employee1.count}</p>
+        <a href=" https://congenial-memory-q765wgppx7x9f6wwj-5001.app.github.dev/employees"><p>Count : ${employee1.count}</a></p>
         `;
       
         tbody.appendChild(row);
