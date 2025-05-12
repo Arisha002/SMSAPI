@@ -72,7 +72,7 @@ app.get('/countries',async(req,res)=>{
         res.status(500).json({Error:err.message});
     }
 });
-app.get('/jobs',async(req,res)=>{
+app.get('/jobs1',async(req,res)=>{
     try{
         const result = await pool.query('select count(*) from jobs');
         res.json(result.rows);
