@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Database Viewer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    .table-box {
+      margin-bottom: 20px;
+      padding: 10px;
+      border: 1px solid #ccc;
+    }
+    .table-box h3 {
+      margin: 0;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      padding: 8px;
+      border: 1px solid #ddd;
+    }
+    button {
+      margin: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Database Tables</h1>
+  <div id="tables-container"></div>
+
+  <script>
+    const baseURL = 'https://congenial-memory-q765wgppx7x9f6wwj-5001.app.github.dev'; // your API base URL
+
+    const tables = [
+      "competition_participants", "orders", "portfolio", "recommendations",
+      "sectors", "stock_alerts", "stocks", "trading_competitions",
+      "transactions", "user_subscriptions", "users1", "watchlists"
+    ];
+
+    const container = document.getElementById("tables-container");
+
+    tables.forEach(async table => {
+      try {
+        const countRes = await fetch(`${baseURL}/${table}/count`);
+        const countData = await countRes.json();
+
+        const box = document.createElement("div");
+        box.className = "table-box";
+        box.innerHTML = `
+          <h3>${table}</h3>
+          <p>Count: ${countData.count || countData[0]?.count || "N/A"}</p>
+          <button onclick="loadTableData('${table}')">View</button>
+          <div id="data-${table}"></div>
+        `;
+        container.appendChild(box);
+      } catch (err) {
+        console.error(`Error loading count for ${table}:`, err);
+      }
+    });
+
+    async function fetchJSON(url, options) {
+      const res = await fetch(url, options);
+      const text = await res.text();
+      try {
+        return JSON.parse(text);
+      } catch {
+        throw new Error(`Expected JSON but got:\n${text}`);
+      }
+    }
+
+    async function loadTableData(table) {
+      try {
+        const res = await fetch(`${baseURL}/${table}/rows`);
+        const data = await res.json();
+
+        const dataDiv = document.getElementById(`data-${table}`);
+        if (data.length === 0) {
+          dataDiv.innerHTML = `<p>No data found.</p>`;
+          return;
+        }
+
+        let html = `<table><thead><tr>`;
+        Object.keys(data[0]).forEach(col => {
+          html += `<th>${col}</th>`;
+        });
+        html += `<th>Actions</th></tr></thead><tbody>`;
+
+        data.forEach(row => {
+          html += `<tr>`;
+          Object.values(row).forEach(value => {
+            html += `<td>${value}</td>`;
+          });
+          html += `<td>
+            <button onclick="editRow('${table}', ${row.id})">Edit</button>
+            <button onclick="deleteRow('${table}', ${row.id})">Delete</button>
+          </td></tr>`;
+        });
+        html += `</tbody></table>
+          <button onclick="insertRow('${table}')">Insert New Row</button>`;
+
+        dataDiv.innerHTML = html;
+      } catch (err) {
+        console.error(`Error loading data for ${table}:`, err);
+      }
+    }
+
+    async function insertRow(table) {
+      try {
+        // Fetch table structure by getting one row, to get keys (except id)
+        const res = await fetch(`${baseURL}/${table}/rows`);
+        const data = await res.json();
+        if (data.length === 0) {
+          alert("No data to determine columns for insert.");
+          return;
+        }
+
+        // Use keys except 'id' (auto increment)
+        const columns = Object.keys(data[0]).filter(col => col !== 'id');
+        const newData = {};
+
+        for (const col of columns) {
+          const val = prompt(`Enter value for "${col}":`);
+          if (val === null) return; // Cancel insert if user presses Cancel
+          newData[col] = val;
+        }
+
+        const result = await fetchJSON(`${baseURL}/${table}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newData),
+        });
+
+        alert('Insert successful!');
+        loadTableData(table);
+      } catch (err) {
+        alert('Insert failed: ' + err.message);
+      }
+    }
+
+    async function editRow(table, id) {
+      try {
+        // Get current row data
+        const res = await fetch(`${baseURL}/${table}/rows`);
+        const data = await res.json();
+        const row = data.find(r => r.id === id);
+        if (!row) {
+          alert("Row not found.");
+          return;
+        }
+
+        // Prompt for each field except 'id'
+        const updates = {};
+        for (const key of Object.keys(row)) {
+          if (key === 'id') continue;
+          const newVal = prompt(`Edit "${key}":`, row[key]);
+          if (newVal === null) return; // Cancel edit
+          updates[key] = newVal;
+        }
+
+        const result = await fetchJSON(`${baseURL}/${table}/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updates),
+        });
+
+        alert('Update successful!');
+        loadTableData(table);
+      } catch (err) {
+        alert('Update failed: ' + err.message);
+      }
+    }
+
+    async function deleteRow(table, id) {
+      if (!confirm("Are you sure you want to delete this row?")) return;
+      try {
+        const result = await fetchJSON(`${baseURL}/${table}/${id}`, { method: 'DELETE' });
+        alert('Delete successful!');
+        loadTableData(table);
+      } catch (err) {
+        alert('Delete failed: ' + err.message);
+      }
+    }
+  </script>
+
+</body>
+</html>
